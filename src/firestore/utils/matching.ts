@@ -10,7 +10,7 @@ export type MatchFunction = (doc: MockDocumentReference) => boolean;
 export function createFirestoreMatchRuleFunction(
   fieldPath: string | FieldPath,
   opStr: WhereFilterOp,
-  value: any
+  value: any,
 ): MatchFunction {
   if (typeof fieldPath === 'string') {
     return (doc: MockDocumentReference) => {
@@ -49,12 +49,12 @@ export function createFirestoreMatchRuleFunction(
 
 export function filterDocumentsByRules<T = DocumentData>(
   docs: MockDocumentReference<T>[],
-  rules?: MockQueryWhereRule[]
+  rules?: MockQueryWhereRule[],
 ): MockDocumentReference<T>[] {
   if (!rules) {
-    return docs.filter(d => d.data !== undefined);
+    return docs.filter((d) => d.data !== undefined);
   }
-  return docs.filter(doc => {
+  return docs.filter((doc) => {
     // Documents that do not exists, will be removed automatically from the list
     if (!doc.data) {
       return false;
@@ -122,6 +122,15 @@ function doesRuleMatch<T>(rule: MockQueryWhereRule, doc: MockDocumentReference<T
       }
 
       if (field.indexOf(value) < 0) {
+        return false;
+      }
+      break;
+    }
+    case 'in': {
+      if (!Array.isArray(value)) {
+        throw new MockFirebaseValidationError(`Error: Value ${value} is not an array.`);
+      }
+      if (value.indexOf(field) < 0) {
         return false;
       }
       break;
